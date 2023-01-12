@@ -16,16 +16,12 @@ public class AddNumbersController {
         }
         StringBuilder resultLine = new StringBuilder();
         for (int i = 0; i < numbersFromFirstLine.length; i++) {
-            resultLine.append(addTwoNumbers(numbersFromFirstLine[i], numbersFromSecondLine[i]));
+            resultLine.append(addTwoFloatNumbers(numbersFromFirstLine[i], numbersFromSecondLine[i]));
             if (i < numbersFromFirstLine.length - 1) {
                 resultLine.append(" ");
             }
         }
         return resultLine.toString();
-    }
-
-    private static String addTwoNumbers(String number1, String number2) {
-        return addTwoFloatNumbers(number1, number2);
     }
 
     private static String addTwoFloatNumbers(String number1, String number2) {
@@ -40,7 +36,7 @@ public class AddNumbersController {
         String integerPartsSumResult = addTwoIntegerNumbers(firstNumberIntPart, secondNumberIntPart);
         Fractional fractional = addTwoFractionalsAndReturnCarryIfExists(firstNumberFraction, secondNumberFraction);
         if (fractional.carryExists) {
-            integerPartsSumResult = addTwoNumbers(integerPartsSumResult, "1");
+            integerPartsSumResult = addTwoIntegerNumbers(integerPartsSumResult, "1");
         }
         if (Pattern.compile("0+").matcher(fractional.fractionalPart).matches()) {
             return integerPartsSumResult;
