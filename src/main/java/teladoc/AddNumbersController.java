@@ -1,6 +1,8 @@
 package teladoc;
 
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class AddNumbersController {
 
@@ -14,34 +16,24 @@ public class AddNumbersController {
         if (numbersFromFirstLine.length != numbersFromSecondLine.length) {
             throw new IllegalArgumentException("The same amount of numbers in both lines is expected");
         }
-        StringBuilder resultLine = new StringBuilder();
-        for (int i = 0; i < numbersFromFirstLine.length; i++) {
-            resultLine.append(addTwoFloatNumbers(numbersFromFirstLine[i], numbersFromSecondLine[i]));
-            if (i < numbersFromFirstLine.length - 1) {
-                resultLine.append(" ");
-            }
-        }
-        return resultLine.toString();
+        return IntStream.range(0, numbersFromFirstLine.length)
+                .mapToObj(i -> addTwoFloatNumbers(numbersFromFirstLine[i].trim(), numbersFromSecondLine[i].trim()))
+                .collect(Collectors.joining(" "));
     }
 
     private static String addTwoFloatNumbers(String number1, String number2) {
-        boolean isFirstNumberDecimal = number1.contains(".");
-        String firstNumberIntPart = isFirstNumberDecimal ? number1.split("\\.")[0] : number1;
-        String firstNumberFraction = isFirstNumberDecimal ? number1.split("\\.")[1] : "0";
+        DecimalNumber decimal1 = DecimalNumber.from(number1);
+        DecimalNumber decimal2 = DecimalNumber.from(number2);
 
-        boolean isSecondNumberDecimal = number2.contains(".");
-        String secondNumberIntPart = isSecondNumberDecimal ? number2.split("\\.")[0] : number2;
-        String secondNumberFraction = isSecondNumberDecimal ? number2.split("\\.")[1] : "0";
-
-        String integerPartsSumResult = addTwoIntegerNumbers(firstNumberIntPart, secondNumberIntPart);
-        Fractional fractional = addTwoFractionalsAndReturnCarryIfExists(firstNumberFraction, secondNumberFraction);
-        if (fractional.carryExists) {
+        String integerPartsSumResult = addTwoIntegerNumbers(decimal1.intPart(), decimal2.intPart());
+        Fraction fraction = addTwoFractionsAndReturnCarryIfExists(decimal1.fraction(), decimal2.fraction());
+        if (fraction.carryExists()) {
             integerPartsSumResult = addTwoIntegerNumbers(integerPartsSumResult, "1");
         }
-        if (Pattern.compile("0+").matcher(fractional.fractionalPart).matches()) {
+        if (Pattern.compile("0+").matcher(fraction.value()).matches()) {
             return integerPartsSumResult;
         }
-        return integerPartsSumResult + "." + fractional.fractionalPart;
+        return integerPartsSumResult + "." + fraction.value();
     }
 
     private static String addTwoIntegerNumbers(String number1, String number2) {
@@ -69,12 +61,12 @@ public class AddNumbersController {
         return reversedResultNumber.reverse().toString();
     }
 
-    private static Fractional addTwoFractionalsAndReturnCarryIfExists(String firstFraction, String secondFraction) {
+    private static Fraction addTwoFractionsAndReturnCarryIfExists(String firstFraction, String secondFraction) {
         if ("0".equals(firstFraction)) {
-            return new Fractional(secondFraction, false);
+            return new Fraction(secondFraction, false);
         }
         if ("0".equals(secondFraction)) {
-            return new Fractional(firstFraction, false);
+            return new Fraction(firstFraction, false);
         }
         if (firstFraction.length() < secondFraction.length()) {
             String stringForSwitch = firstFraction;
@@ -84,10 +76,23 @@ public class AddNumbersController {
         secondFraction = secondFraction + "0".repeat(firstFraction.length() - secondFraction.length());
         String fractionSum = addTwoIntegerNumbers(firstFraction, secondFraction);
         if (fractionSum.length() > firstFraction.length()) {
-            return new Fractional(fractionSum.substring(1), true);
+            return new Fraction(fractionSum.substring(1), true);
         }
-        return new Fractional(fractionSum, false);
+        return new Fraction(fractionSum, false);
     }
 
-    private record Fractional(String fractionalPart, boolean carryExists) {}
+    private record DecimalNumber(String intPart, String fraction) {
+
+        public static DecimalNumber from(String number) {
+            String[] decimalParts = number.split("\\.");
+            if (decimalParts.length == 1) {
+                return new DecimalNumber(number, "0");
+            }
+            if (decimalParts.length > 2) {
+                throw new IllegalArgumentException("Invalid format of number " + number);
+            }
+            return new DecimalNumber(decimalParts[0], decimalParts[1]);
+        }
+    }
+    private record Fraction(String value, boolean carryExists) {}
 }
