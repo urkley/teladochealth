@@ -25,11 +25,27 @@ public class AddNumbersController {
     }
 
     private static String addTwoNumbers(String number1, String number2) {
-        if (!number1.contains(".") && !number2.contains(".")) {
-            return addTwoIntegerNumbers(number1, number2);
-        } else {
-            return addTwoFloatNumbers(number1, number2);
+        return addTwoFloatNumbers(number1, number2);
+    }
+
+    private static String addTwoFloatNumbers(String number1, String number2) {
+        boolean isFirstNumberDecimal = number1.contains(".");
+        String firstNumberIntPart = isFirstNumberDecimal ? number1.split("\\.")[0] : number1;
+        String firstNumberFraction = isFirstNumberDecimal ? number1.split("\\.")[1] : "0";
+
+        boolean isSecondNumberDecimal = number2.contains(".");
+        String secondNumberIntPart = isSecondNumberDecimal ? number2.split("\\.")[0] : number2;
+        String secondNumberFraction = isSecondNumberDecimal ? number2.split("\\.")[1] : "0";
+
+        String integerPartsSumResult = addTwoIntegerNumbers(firstNumberIntPart, secondNumberIntPart);
+        Fractional fractional = addTwoFractionalsAndReturnCarryIfExists(firstNumberFraction, secondNumberFraction);
+        if (fractional.carryExists) {
+            integerPartsSumResult = addTwoNumbers(integerPartsSumResult, "1");
         }
+        if (Pattern.compile("0+").matcher(fractional.fractionalPart).matches()) {
+            return integerPartsSumResult;
+        }
+        return integerPartsSumResult + "." + fractional.fractionalPart;
     }
 
     private static String addTwoIntegerNumbers(String number1, String number2) {
@@ -55,23 +71,6 @@ public class AddNumbersController {
             reversedResultNumber.append("1");
         }
         return reversedResultNumber.reverse().toString();
-    }
-
-    private static String addTwoFloatNumbers(String number1, String number2) {
-        boolean isFirstNumberDecimal = number1.contains(".");
-        String firstNumberIntPart = isFirstNumberDecimal ? number1.split("\\.")[0] : number1;
-        String firstNumberFraction = isFirstNumberDecimal ? number1.split("\\.")[1] : "0";
-
-        boolean isSecondNumberDecimal = number2.contains(".");
-        String secondNumberIntPart = isSecondNumberDecimal ? number2.split("\\.")[0] : number2;
-        String secondNumberFraction = isSecondNumberDecimal ? number2.split("\\.")[1] : "0";
-
-        String integerPartsSumResult = addTwoIntegerNumbers(firstNumberIntPart, secondNumberIntPart);
-        Fractional fractional = addTwoFractionalsAndReturnCarryIfExists(firstNumberFraction, secondNumberFraction);
-        if (fractional.carryExists) {
-            integerPartsSumResult = addTwoNumbers(integerPartsSumResult, "1");
-        }
-        return integerPartsSumResult + "." + fractional.fractionalPart;
     }
 
     private static Fractional addTwoFractionalsAndReturnCarryIfExists(String firstFraction, String secondFraction) {

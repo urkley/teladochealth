@@ -30,6 +30,12 @@ public class AddNumbersControllerTest {
     }
 
     @Test
+    public void testAddDecimalNumbersWhenSumIsWithZeroDecimalPart() {
+        String resultString = AddNumbersController.addNumbers("1.9 8.33", "2.1 13.67");
+        Assert.assertEquals(resultString, "4 22");
+    }
+
+    @Test
     public void testAddDecimalAndIntegerNumbers() {
         String resultString = AddNumbersController.addNumbers("99 2.345", "1.19876 2345678901");
         Assert.assertEquals(resultString, "100.19876 2345678903.345");
