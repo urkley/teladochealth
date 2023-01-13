@@ -4,11 +4,13 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class AddNumbersController {
+public class AddNumbersTestTask {
+
+    private static final Pattern patternDigitsAndSpacesOnly = Pattern.compile("[\\d\\s.]+");
+    private static final Pattern patternZeroOnly = Pattern.compile("0+");
 
     public static String addNumbers(String firstLine, String secondLine) {
-        Pattern pattern = Pattern.compile("[\\d\\s.]+");
-        if (!pattern.matcher(firstLine).matches() || !pattern.matcher(secondLine).matches()) {
+        if (!patternDigitsAndSpacesOnly.matcher(firstLine).matches() || !patternDigitsAndSpacesOnly.matcher(secondLine).matches()) {
             throw new IllegalArgumentException("Only numbers and spaces are expected");
         }
         String[] numbersFromFirstLine = firstLine.split(" ");
@@ -30,7 +32,7 @@ public class AddNumbersController {
         if (fraction.carryExists()) {
             integerPartsSumResult = addTwoIntegerNumbers(integerPartsSumResult, "1");
         }
-        if (Pattern.compile("0+").matcher(fraction.value()).matches()) {
+        if (patternZeroOnly.matcher(fraction.value()).matches()) {
             return integerPartsSumResult;
         }
         return integerPartsSumResult + "." + fraction.value();
